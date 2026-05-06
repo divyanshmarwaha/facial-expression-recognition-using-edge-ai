@@ -1,5 +1,6 @@
 pip install opencv-python mediapipe pyserial
 
+
 import cv2
 import mediapipe as mp
 import serial
@@ -98,3 +99,31 @@ while True:
 
 cap.release()
 cv2.destroyAllWindows()
+
+
+import os
+
+def print_dashboard(emotion, confidence, accuracy,
+                    correct_predictions, total_predictions,
+                    mouth_width, mouth_open, eye_open,
+                    brow_avg, mouth_tilt):
+
+    # Clear console (makes it look live)
+    os.system('cls' if os.name == 'nt' else 'clear')
+
+    print("====== AI EMOTION SYSTEM ======\n")
+
+    print(f"Prediction : {emotion}")
+    print(f"Confidence : {round(confidence, 2)}\n")
+
+    print(f"Accuracy   : {round(accuracy, 2)}%")
+    print(f"Correct    : {correct_predictions} / {total_predictions}\n")
+
+    print("--- FEATURES ---")
+    print(f"Mouth Width : {round(mouth_width, 3)}")
+    print(f"Mouth Open  : {round(mouth_open, 3)}")
+    print(f"Eye Open    : {round(eye_open, 3)}")
+    print(f"Brow Avg    : {round(brow_avg, 3)}")
+    print(f"Mouth Tilt  : {round(mouth_tilt, 3)}")
+
+    print("\n==============================")
