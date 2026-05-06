@@ -6,7 +6,6 @@ import serial
 import time
 import math
 
-# Serial (change COM port accordingly)
 arduino = serial.Serial('COM3', 9600)
 time.sleep(2)
 
@@ -31,35 +30,59 @@ while True:
     if results.multi_face_landmarks:
         face = results.multi_face_landmarks[0].landmark
 
-        # Key landmarks
+        # ---- Key Points ----
         left_mouth = face[61]
         right_mouth = face[291]
         top_lip = face[13]
         bottom_lip = face[14]
+
         left_eye = face[159]
         right_eye = face[386]
+
         brow_left = face[70]
         brow_right = face[300]
 
+        nose = face[1]
+
+        # ---- Features ----
         mouth_width = distance(left_mouth, right_mouth)
         mouth_open = distance(top_lip, bottom_lip)
         eye_open = distance(left_eye, right_eye)
-        brow_height = (brow_left.y + brow_right.y) / 2
 
-        # ---- Emotion Rules ----
-        if mouth_width > 0.06 and mouth_open < 0.02:
-            emotion = "HAPPY"
+        brow_avg = (brow_left.y + brow_right.y) / 2
+        brow_diff = abs(brow_left.y - brow_right.y)
 
-        elif mouth_open < 0.015 and brow_height < 0.3:
-            emotion = "ANGRY"
+        # asymmetry (for contempt)
+        mouth_tilt = abs(left_mouth.y - right_mouth.y)
 
-        elif mouth_open > 0.05:
+        # ---- Emotion Detection (Priority Order) ----
+
+        # 1. SURPRISE
+        if mouth_open > 0.06 and eye_open > 0.04:
             emotion = "SURPRISE"
 
-        elif eye_open > 0.04 and mouth_open > 0.03:
+        # 2. FEAR
+        elif eye_open > 0.045 and mouth_open > 0.035:
             emotion = "FEAR"
 
-        elif mouth_width < 0.04 and mouth_open < 0.02:
+        # 3. ANGER
+        elif brow_avg < 0.30 and mouth_open < 0.02:
+            emotion = "ANGRY"
+
+        # 4. DISGUST (nose + lip tightening approx)
+        elif mouth_open < 0.02 and mouth_width < 0.045 and brow_avg < 0.35:
+            emotion = "DISGUST"
+
+        # 5. CONTEMPT (asymmetry)
+        elif mouth_tilt > 0.015:
+            emotion = "CONTEMPT"
+
+        # 6. HAPPY
+        elif mouth_width > 0.06 and mouth_open < 0.03:
+            emotion = "HAPPY"
+
+        # 7. SAD
+        elif mouth_width < 0.045 and mouth_open < 0.02:
             emotion = "SAD"
 
         # Send to Arduino
