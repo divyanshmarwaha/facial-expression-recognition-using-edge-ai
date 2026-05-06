@@ -50,6 +50,13 @@ void loop() {
       myServo.write(60);
     }
 
+    else if (emotion == "DISGUST") {
+      myServo.write(30);
+      }
+    else if (emotion == "CONTEMPT") {
+      myServo.write(150);
+      }  
+
     else {
       myServo.write(90);
       digitalWrite(LED_PIN, LOW);
